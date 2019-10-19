@@ -1,8 +1,5 @@
 from ortools.linear_solver import pywraplp
-import matplotlib.pyplot as plt
-plt.style.use('seaborn-whitegrid')
-import numpy as np
-import sympy as sym
+from draw import plot_constraints
 
 # Define a linear optimization problem on the following:
 #
@@ -45,6 +42,7 @@ def main():
 
     # Solve the system.
     solver.Solve()
+    solution_point = (x.solution_value(), y.solution_value())
     opt_solution = 3 * x.solution_value() + 4 * y.solution_value()
     print('Number of variables =', solver.NumVariables())
     print('Number of constraints =', solver.NumConstraints())
@@ -56,55 +54,7 @@ def main():
     print('Optimal objective value =', opt_solution)
 
     
-    plot_constraints(solver)
-
-def plot_constraints(solver):
-    variables = solver.variables()
-    list_of_constraints = solver.constraints()
-    x_coeffs = []
-    y_coeffs = []
-    rhs_values = []
-    for constraint in list_of_constraints:
-        low_bound = constraint.lb()
-        upp_bound = constraint.ub()
-
-        if (low_bound != solver.infinity() and low_bound != -solver.infinity()):
-            rhs_values.append(low_bound)
-        else:
-            rhs_values.append(upp_bound)
-
-
-        x_coeff = constraint.GetCoefficient(variables[0])
-        y_coeff = constraint.GetCoefficient(variables[1])
-
-        x_coeffs.append(x_coeff)
-        y_coeffs.append(y_coeff)
-    
-    #print(x_coeffs)
-    #print(y_coeffs)
-    #print(rhs_values)
-
-    numEquations = len(solver.constraints())
-    y_vals = []
-    
-    #Display lines of constraints
-    for i in range(numEquations):
-        x_coeff = x_coeffs[i - 1]
-        y_coeff = y_coeffs[i - 1]
-        rhs = rhs_values[i - 1]
-
-        x = np.linspace(-20, 20, 2000)
-
-        #solve constraint in terms of x
-        y = (rhs - (x_coeff*x)) / y_coeff
-        y_vals.append(y)
-        
-        plt.plot(x, y)
-
-    
-
-    plt.show()
-
+    plot_constraints(solver, solution_point)
         
 
 if __name__ == '__main__':
