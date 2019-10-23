@@ -40,7 +40,7 @@ def plot_constraints(solver, solution_point):
 
     numEquations = len(solver.constraints())
     y_vals = []
-    
+
     #Display lines of constraints
     for i in range(numEquations):
         x_coeff = x_coeffs[i - 1]
@@ -50,7 +50,10 @@ def plot_constraints(solver, solution_point):
         x = np.linspace(-20, 20, 2000)
 
         #solve constraint in terms of x
-        y = (rhs - (x_coeff*x)) / y_coeff
+        if (y_coeff == 0):
+            y = 0
+        else:
+            y = (rhs - (x_coeff*x)) / y_coeff
         y_vals.append(y)
         
 
@@ -61,10 +64,11 @@ def plot_constraints(solver, solution_point):
             if (lineOne != lineTwo):
                 (x, y) = find_intersect(lineOne, lineTwo)
                 points.append([x, y])
-                #plt.plot(x, y, 'o')
+                
 
     points = np.array(points)
 
+    
     #Shade feasible region
     chull = ConvexHull(points)
     for simplex in chull.simplices:
@@ -84,6 +88,10 @@ def plot_constraints(solver, solution_point):
                 facecolor=color, alpha=0.2)
     poly.set_capstyle('round')
     plt.gca().add_patch(poly)
+    
+    plt.arrow(3, 2, -2, -2, shape = 'full', head_width = 0.05, head_length = 0.05, color = 'blue')
+    plt.arrow(3.2, 1, -2.2, -2, shape = 'full', head_width = 0.05, head_length = 0.05, color = 'blue')
+
 
     #Plot solution point
     plt.plot(solution_point[0], solution_point[1], color='green', marker='x', markersize = 10.0)
@@ -101,10 +109,24 @@ def find_intersect(lineOne, lineTwo):
     e = lineTwo.y_coeff
     f = lineTwo.rhs
 
-    num = ((c/b) - (f/e))
-    den = ((a/b) - (d/e))
-    
-    x = num/den
-    y = (c - (a*x))/b
+    x = 0
+    y = 0
+    if (a == 0):
+        y = c/b
+        x = (f - e*y)/d
+    elif (b == 0):
+        x = c/a
+        y = (f - d*x)/e
+    elif (d == 0):
+        y = f/e
+        x = (c - b*y)/a
+    elif (e == 0):
+        x = f/d
+        y = (c - a*x)/b
+    else:
+        x = (e*c - b*f)/(e*a - b*d)
+
+
+    #print("x: ", x, "y: ", y)
 
     return (x, y)
